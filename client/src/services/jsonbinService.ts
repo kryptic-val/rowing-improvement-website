@@ -1,15 +1,26 @@
+import bcrypt from 'bcryptjs';
+
 // JSONBin Configuration
 const JSONBIN_BIN_ID = process.env.REACT_APP_JSONBIN_BIN_ID || '6894f946ae596e708fc466ca';
 const JSONBIN_API_KEY = process.env.REACT_APP_JSONBIN_API_KEY || '$2a$10$2sOqkO6kJcDT2VxEmJA.Ce72OnmrtYiyBUalrFOP3BpPOyF/jzazy';
 const JSONBIN_BASE_URL = process.env.REACT_APP_JSONBIN_BASE_URL || 'https://api.jsonbin.io/v3/b';
 
+// Salt rounds for password hashing
+const SALT_ROUNDS = 12;
+
 export interface User {
   id: string;
   email: string;
-  password: string; // In production, this should be hashed
+  password?: string; // Optional when returning user data (for security)
   name: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateUserData {
+  email: string;
+  password: string; // Required when creating a user
+  name: string;
 }
 
 export interface JSONBinResponse {
@@ -42,6 +53,29 @@ class JSONBinService {
     };
   }
 
+  /**
+   * Hash a password using bcrypt
+   */
+  private async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, SALT_ROUNDS);
+  }
+
+  /**
+   * Compare a plain text password with a hashed password
+   */
+  private async comparePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  /**
+   * Test method to verify password hashing is working (for development only)
+   */
+  async testPasswordHashing(plainPassword: string): Promise<{ hashed: string; isValid: boolean }> {
+    const hashed = await this.hashPassword(plainPassword);
+    const isValid = await this.comparePassword(plainPassword, hashed);
+    return { hashed, isValid };
+  }
+
   async getUsers(): Promise<User[]> {
     try {
       const response = await fetch(`${this.baseURL}/${this.binId}`, {
@@ -61,7 +95,7 @@ class JSONBinService {
     }
   }
 
-  async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User | null> {
+  async createUser(userData: CreateUserData): Promise<User | null> {
     try {
       // First, get existing users
       const existingUsers = await this.getUsers();
@@ -72,9 +106,13 @@ class JSONBinService {
         throw new Error('User with this email already exists');
       }
 
-      // Create new user
+      // Hash the password before storing
+      const hashedPassword = await this.hashPassword(userData.password);
+
+      // Create new user with hashed password
       const newUser: User = {
         ...userData,
+        password: hashedPassword, // Store the hashed password
         id: this.generateId(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -94,7 +132,9 @@ class JSONBinService {
         throw new Error(`Failed to create user: ${response.statusText}`);
       }
 
-      return newUser;
+      // Return user without password for security
+      const { password, ...userWithoutPassword } = newUser;
+      return userWithoutPassword as User;
     } catch (error) {
       console.error('Error creating user:', error);
       throw error;
@@ -110,12 +150,16 @@ class JSONBinService {
         throw new Error('User not found');
       }
 
-      // Update user
-      existingUsers[userIndex] = {
-        ...existingUsers[userIndex],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
+      // If password is being updated, hash it
+      let updatedUser = { ...existingUsers[userIndex], ...updates };
+      if (updates.password) {
+        updatedUser.password = await this.hashPassword(updates.password);
+      }
+
+      updatedUser.updatedAt = new Date().toISOString();
+
+      // Update user in array
+      existingUsers[userIndex] = updatedUser;
 
       // Update the bin
       const response = await fetch(`${this.baseURL}/${this.binId}`, {
@@ -128,7 +172,9 @@ class JSONBinService {
         throw new Error(`Failed to update user: ${response.statusText}`);
       }
 
-      return existingUsers[userIndex];
+      // Return user without password for security
+      const { password, ...userWithoutPassword } = updatedUser;
+      return userWithoutPassword as User;
     } catch (error) {
       console.error('Error updating user:', error);
       throw error;
@@ -138,8 +184,22 @@ class JSONBinService {
   async authenticateUser(email: string, password: string): Promise<User | null> {
     try {
       const users = await this.getUsers();
-      const user = users.find(u => u.email === email && u.password === password);
-      return user || null;
+      const user = users.find(u => u.email === email);
+      
+      if (!user) {
+        return null;
+      }
+
+      // Compare the provided password with the stored hash
+      const isPasswordValid = await this.comparePassword(password, user.password);
+      
+      if (!isPasswordValid) {
+        return null;
+      }
+
+      // Return user without password for security
+      const { password: _, ...userWithoutPassword } = user;
+      return userWithoutPassword as User;
     } catch (error) {
       console.error('Error authenticating user:', error);
       return null;
@@ -149,7 +209,15 @@ class JSONBinService {
   async getUserById(userId: string): Promise<User | null> {
     try {
       const users = await this.getUsers();
-      return users.find(user => user.id === userId) || null;
+      const user = users.find(user => user.id === userId);
+      
+      if (!user) {
+        return null;
+      }
+
+      // Return user without password for security
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword as User;
     } catch (error) {
       console.error('Error fetching user by ID:', error);
       return null;
