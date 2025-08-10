@@ -9,9 +9,12 @@ import Home from './pages/Home';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard';
+import TrainingPlans from './pages/TrainingPlans';
 import Workouts from './pages/Workouts';
-import Analysis from './pages/Analysis';
+import Progress from './pages/Progress';
+import VideoAnalysis from './pages/VideoAnalysis';
 import Community from './pages/Community';
+import Nutrition from './pages/Nutrition';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
@@ -37,31 +40,47 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               
-              {/* Protected routes */}
+              {/* Protected routes - Dashboard has its own layout */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/workouts" element={
+              
+              {/* Protected routes with Layout wrapper */}
+              <Route path="/training-plans" element={
                 <ProtectedRoute>
-                  <Layout>
-                    <Workouts />
-                  </Layout>
+                  <TrainingPlans />
                 </ProtectedRoute>
               } />
-              <Route path="/analysis" element={
+              <Route path="/workouts" element={
                 <ProtectedRoute>
-                  <Layout>
-                    <Analysis />
-                  </Layout>
+                  <Workouts />
+                </ProtectedRoute>
+              } />
+              <Route path="/progress" element={
+                <ProtectedRoute>
+                  <Progress />
+                </ProtectedRoute>
+              } />
+              <Route path="/video-analysis" element={
+                <ProtectedRoute>
+                  <VideoAnalysis />
                 </ProtectedRoute>
               } />
               <Route path="/community" element={
                 <ProtectedRoute>
-                  <Layout>
-                    <Community />
-                  </Layout>
+                  <Community />
+                </ProtectedRoute>
+              } />
+              <Route path="/nutrition" element={
+                <ProtectedRoute>
+                  <Nutrition />
+                </ProtectedRoute>
+              } />
+              <Route path="/calendar" element={
+                <ProtectedRoute>
+                  <Dashboard />
                 </ProtectedRoute>
               } />
               <Route path="/profile" element={

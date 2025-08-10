@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeToggle from '../components/UI/ThemeToggle';
@@ -18,27 +19,28 @@ import {
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const { isDark } = useTheme();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
   };
 
   const sidebarItems = [
-    { name: 'Dashboard', icon: ChartBarIcon, active: true },
-    { name: 'Training Plans', icon: CalendarIcon, active: false },
-    { name: 'Workouts', icon: FireIcon, active: false },
-    { name: 'Progress', icon: ChartBarIcon, active: false },
-    { name: 'Video Analysis', icon: VideoCameraIcon, active: false },
-    { name: 'Community', icon: UsersIcon, active: false },
-    { name: 'Nutrition', icon: CogIcon, active: false },
-    { name: 'Calendar', icon: CalendarIcon, active: false },
+    { name: 'Dashboard', icon: ChartBarIcon, path: '/dashboard', active: location.pathname === '/dashboard' },
+    { name: 'Training Plans', icon: CalendarIcon, path: '/training-plans', active: location.pathname === '/training-plans' },
+    { name: 'Workouts', icon: FireIcon, path: '/workouts', active: location.pathname === '/workouts' },
+    { name: 'Progress', icon: ChartBarIcon, path: '/progress', active: location.pathname === '/progress' },
+    { name: 'Video Analysis', icon: VideoCameraIcon, path: '/video-analysis', active: location.pathname === '/video-analysis' },
+    { name: 'Community', icon: UsersIcon, path: '/community', active: location.pathname === '/community' },
+    { name: 'Nutrition', icon: CogIcon, path: '/nutrition', active: location.pathname === '/nutrition' },
+    { name: 'Calendar', icon: CalendarIcon, path: '/calendar', active: location.pathname === '/calendar' },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pastel-blue-50 via-white to-pastel-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-500">
       {/* Header */}
       <header className="bg-gradient-to-r from-pastel-blue-600 to-pastel-blue-700 dark:from-gray-800 dark:to-gray-900 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
@@ -62,14 +64,15 @@ const Dashboard: React.FC = () => {
       </header>
 
       {/* Main Layout */}
-      <div className="flex max-w-7xl mx-auto">
+      <div className="flex w-full">
         {/* Sidebar */}
-        <aside className="w-64 bg-white dark:bg-gray-800 shadow-lg min-h-screen">
+        <aside className="w-64 bg-white dark:bg-gray-800 shadow-lg min-h-screen flex-shrink-0">
           <nav className="p-6">
             <ul className="space-y-2">
               {sidebarItems.map((item) => (
                 <li key={item.name}>
-                  <button
+                  <Link
+                    to={item.path}
                     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                       item.active
                         ? 'bg-gradient-to-r from-pastel-blue-500 to-pastel-blue-600 text-white shadow-md'
@@ -78,7 +81,7 @@ const Dashboard: React.FC = () => {
                   >
                     <item.icon className="w-5 h-5" />
                     <span className="font-medium">{item.name}</span>
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -86,7 +89,7 @@ const Dashboard: React.FC = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 min-w-0">
           {/* Content Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -187,7 +190,7 @@ const Dashboard: React.FC = () => {
         </main>
 
         {/* Right Panel */}
-        <aside className="w-80 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 border-l border-gray-200 dark:border-gray-700">
+        <aside className="w-80 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 border-l border-gray-200 dark:border-gray-700 flex-shrink-0">
           <div className="space-y-6">
             {/* Weekly Performance */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">

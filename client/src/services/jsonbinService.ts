@@ -186,7 +186,7 @@ class JSONBinService {
       const users = await this.getUsers();
       const user = users.find(u => u.email === email);
       
-      if (!user) {
+      if (!user || !user.password) {
         return null;
       }
 
