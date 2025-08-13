@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
@@ -9,12 +9,9 @@ import Home from './pages/Home';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard';
-import TrainingPlans from './pages/TrainingPlans';
 import Workouts from './pages/Workouts';
-import Progress from './pages/Progress';
-import VideoAnalysis from './pages/VideoAnalysis';
+import Analysis from './pages/Analysis';
 import Community from './pages/Community';
-import Nutrition from './pages/Nutrition';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
@@ -40,47 +37,33 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               
-              {/* Protected routes - Dashboard has its own layout */}
+              {/* Protected routes */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              
-              {/* Protected routes with Layout wrapper */}
-              <Route path="/training-plans" element={
-                <ProtectedRoute>
-                  <TrainingPlans />
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
                 </ProtectedRoute>
               } />
               <Route path="/workouts" element={
                 <ProtectedRoute>
-                  <Workouts />
+                  <Layout>
+                    <Workouts />
+                  </Layout>
                 </ProtectedRoute>
               } />
-              <Route path="/progress" element={
+              <Route path="/analysis" element={
                 <ProtectedRoute>
-                  <Progress />
-                </ProtectedRoute>
-              } />
-              <Route path="/video-analysis" element={
-                <ProtectedRoute>
-                  <VideoAnalysis />
+                  <Layout>
+                    <Analysis />
+                  </Layout>
                 </ProtectedRoute>
               } />
               <Route path="/community" element={
                 <ProtectedRoute>
-                  <Community />
-                </ProtectedRoute>
-              } />
-              <Route path="/nutrition" element={
-                <ProtectedRoute>
-                  <Nutrition />
-                </ProtectedRoute>
-              } />
-              <Route path="/calendar" element={
-                <ProtectedRoute>
-                  <Dashboard />
+                  <Layout>
+                    <Community />
+                  </Layout>
                 </ProtectedRoute>
               } />
               <Route path="/profile" element={
@@ -90,9 +73,6 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               } />
-              
-              {/* Redirect authenticated users to dashboard */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </Router>
         </SocketProvider>

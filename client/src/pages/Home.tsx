@@ -1,26 +1,18 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemeToggle from '../components/UI/ThemeToggle';
-import { ArrowRightIcon, ChartBarIcon, VideoCameraIcon, UserGroupIcon, HeartIcon, PlayIcon } from '@heroicons/react/24/outline';
+import { 
+  ChartBarIcon, 
+  VideoCameraIcon, 
+  UserGroupIcon, 
+  HeartIcon,
+  ArrowRightIcon,
+  PlayIcon
+} from '@heroicons/react/24/outline';
 
 const Home: React.FC = () => {
-  const { user } = useAuth();
   const { isDark } = useTheme();
-  const navigate = useNavigate();
-
-  // Redirect to dashboard if user is already logged in
-  React.useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
-
-  // Don't render the home page if user is logged in (will redirect)
-  if (user) {
-    return null;
-  }
 
   const features = [
     {
